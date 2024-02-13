@@ -1,0 +1,18 @@
+rp-manifest: 1
+id: dbus-binding
+version: 1.0
+name: dbus-binding
+description: Provides a API for dbus
+author: IoT.bzh team <team@iot.bzh>
+license: MIT
+targets:
+  - target: main
+    content:
+      src: lib/dbus-binding.so
+      type: application/vnd.agl.resource
+    required-binding:
+      - name: lib/dbus-binding.so
+        value: local
+    provided-api:
+      - name: dbus
+        value: auto
