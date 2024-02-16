@@ -1,0 +1,24 @@
+rp-manifest: 1
+id: dbus-binding-test
+version: 0.1
+name: dbus-binding-test
+description: dbus binding test
+author: IoT.bzh team <team@iot.bzh>
+license: MIT
+targets:
+  - target: main
+    content:
+      src: bin/start-binder.sh
+      type: application/x-executable
+
+    required-binding:
+      - name: dbus-binding
+        value: extern
+
+    provided-api:
+      - name: dbus-binding
+        value: ws
+
+file-properties:
+  - name: bin/start-binder.sh
+    value: executable
