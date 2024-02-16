@@ -1,0 +1,10 @@
+{
+    "binding": [
+        {
+            "path": "/usr/redpesk/dbus-binding/lib/dbus-binding.so",
+            "uid": "dbus-binding",
+            "api": "dbus",
+            "info": "Binding for interfacing DBUS"
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "name": "afb-dbus",
+    "no-ldpaths": true,
+    "alias": [
+        "/devtools:/usr/share/afb-ui-devtools/binder"
+    ],
+    "monitoring": true,
+    "ws-server": [
+        "tcp::12391/dbus"
+    ]
+}
