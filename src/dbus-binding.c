@@ -20,6 +20,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <sys/eventfd.h>
+#include <stdbool.h>
 
 #include <systemd/sd-bus.h>
 #include <systemd/sd-bus-protocol.h>
@@ -27,7 +28,7 @@
 
 #define AFB_BINDING_VERSION 4
 #include <afb/afb-binding.h>
-
+#include <pcsc-glue.h>
 #include "dbus-jsonc.h"
 
 /**
@@ -48,6 +49,9 @@
 * size of the job queue
 */
 #define MXNRJOB 10
+
+// nfc event
+static afb_event_t event_nfc;
 
 /**
 * structure for event/signal specification
@@ -569,6 +573,37 @@ static void process_unsubscribe(afb_req_t req)
 	process_sub(req, -1);
 }
 
+static void check_nfc_cb(afb_timer_t timer, void *closure, unsigned decount)
+{
+	bool nfc_state = false;
+	afb_data_t ev_data;
+	// from the pcsd library
+	pcscHandleT *handle;
+	ulong readerCount = 2;
+    const char *readerList[readerCount];
+
+	// AFB_NOTICE("Check nfc...");
+
+	handle=pcscList(readerList, &readerCount);
+
+	if(!handle)
+		AFB_ERROR("Failed to connect to pcscd daemon");
+	else
+	{
+		nfc_state=true;
+		
+		if(readerCount)
+		{
+			afb_create_data_copy(&ev_data, AFB_PREDEFINED_TYPE_STRINGZ, readerList[0], strlen(readerList[0]) + 1);
+			afb_event_push(event_nfc, 1, &ev_data);
+			afb_timer_unref(timer);
+		}
+		
+		// AFB_NOTICE("%lu , %s",readerCount,readerList[0]);
+	}
+
+}
+
 /*****************************************************************************************/
 /* manage signals */
 /*****************************************************************************************/
@@ -784,6 +819,25 @@ static void v_unsubscribe(afb_req_t req, unsigned narg, const afb_data_t args[])
 	submit(req, process_unsubscribe);
 }
 
+static void v_nfc_check(afb_req_t req, unsigned narg, const afb_data_t args[])
+{
+	afb_timer_t timer_nfc_check;
+
+	int location_timer;
+
+	afb_req_subscribe(req, event_nfc);
+
+	// every 5 seconds, an event is sent to the listeners (e.g. display-binding)
+	location_timer = afb_timer_create(&timer_nfc_check, 0, 0, 0, 0, 5000, 0, check_nfc_cb, NULL, 0);
+    
+	if (location_timer < 0)
+    {
+        AFB_NOTICE("Timer launch fail");
+    }
+
+	afb_req_reply(req, 0, 0, NULL);
+}
+
 static void v_version(afb_req_t req, unsigned narg, const afb_data_t args[])
 {
 	afb_data_t data;
@@ -793,11 +847,12 @@ static void v_version(afb_req_t req, unsigned narg, const afb_data_t args[])
 
 /* array of the verbs exported to afb-daemon */
 static const afb_verb_t verbs[] = {
-  { .verb="version",     .callback=v_version,     .info="get cuurent version" },
-  { .verb="call",        .callback=v_call,        .info="call to dbus method" },
-  { .verb="signal",      .callback=v_signal,      .info="signal to dbus method" },
-  { .verb="subscribe",   .callback=v_subscribe,   .info="subscribe to a dbus signal" },
-  { .verb="unsubscribe", .callback=v_unsubscribe, .info="unsubscribe to a dbus signal" },
+  { .verb="version",       .callback=v_version,     .info="get cuurent version" },
+  { .verb="call",          .callback=v_call,        .info="call to dbus method" },
+  { .verb="signal",        .callback=v_signal,      .info="signal to dbus method" },
+  { .verb="subscribe",     .callback=v_subscribe,   .info="subscribe to a dbus signal" },
+  { .verb="unsubscribe",   .callback=v_unsubscribe, .info="unsubscribe to a dbus signal" },
+  { .verb="subscribe_nfc", .callback=v_nfc_check,   .info="subscribe to the nfc check" },
   { .verb=NULL }
 };
 
@@ -830,6 +885,9 @@ static int mainctl(afb_api_t api, afb_ctlid_t ctlid, afb_ctlarg_t ctlarg, void *
 		/* start the thread */
 		if (rc >= 0)
 			rc = pthread_create(&thread, NULL, run, NULL);
+		break;
+	case afb_ctlid_Init:
+		rc = afb_api_new_event(api, " NFC event - the device exists", &event_nfc);
 		break;
 	default:
 		break;
