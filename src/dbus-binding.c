@@ -591,7 +591,7 @@ static void check_nfc_cb(afb_timer_t timer, void *closure, unsigned decount)
 	else
 	{
 		nfc_state=true;
-		
+
 		if(readerCount)
 		{
 			afb_create_data_copy(&ev_data, AFB_PREDEFINED_TYPE_STRINGZ, readerList[0], strlen(readerList[0]) + 1);
@@ -845,6 +845,11 @@ static void v_version(afb_req_t req, unsigned narg, const afb_data_t args[])
 	afb_req_reply(req, 0, 1, &data);
 }
 
+static void v_info(afb_req_t req, unsigned narg, const afb_data_t args[])
+{
+	afb_req_reply(req, 0, 0, NULL);
+}
+
 /* array of the verbs exported to afb-daemon */
 static const afb_verb_t verbs[] = {
   { .verb="version",       .callback=v_version,     .info="get cuurent version" },
@@ -853,6 +858,7 @@ static const afb_verb_t verbs[] = {
   { .verb="subscribe",     .callback=v_subscribe,   .info="subscribe to a dbus signal" },
   { .verb="unsubscribe",   .callback=v_unsubscribe, .info="unsubscribe to a dbus signal" },
   { .verb="subscribe_nfc", .callback=v_nfc_check,   .info="subscribe to the nfc check" },
+  { .verb="info",          .callback=v_info,        .info="info of all verbs" },
   { .verb=NULL }
 };
 
