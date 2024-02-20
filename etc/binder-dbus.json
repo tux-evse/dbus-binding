@@ -7,5 +7,6 @@
     "monitoring": true,
     "ws-server": [
         "tcp::12311/dbus"
-    ]
+    ],
+    "no-httpd":"false"
 }

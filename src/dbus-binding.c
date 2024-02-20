@@ -587,7 +587,7 @@ static void check_nfc_cb(afb_timer_t timer, void *closure, unsigned decount)
 	handle=pcscList(readerList, &readerCount);
 
 	if(!handle)
-		AFB_ERROR("Failed to connect to pcscd daemon");
+		AFB_ERROR("Failed to connect to pcscd");
 	else
 	{
 		nfc_state=true;
@@ -599,7 +599,7 @@ static void check_nfc_cb(afb_timer_t timer, void *closure, unsigned decount)
 			afb_timer_unref(timer);
 		}
 		
-		// AFB_NOTICE("%lu , %s",readerCount,readerList[0]);
+		AFB_NOTICE("NFC reader %lu found, %s",readerCount,readerList[0]);
 	}
 
 }
