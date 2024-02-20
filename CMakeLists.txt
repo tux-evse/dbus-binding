@@ -44,7 +44,7 @@ add_library(dbus-binding MODULE src/dbus-binding.c src/dbus-jsonc.c)
 target_compile_definitions(dbus-binding PRIVATE DEFAULT_BUSNAME=BUSNAME_${DEFBUS} VERSION="${PROJECT_VERSION}")
 target_compile_options(dbus-binding PRIVATE ${DEPS_CFLAGS})
 target_include_directories(dbus-binding PRIVATE ${DEPS_INCLUDE_DIRS})
-target_link_libraries(dbus-binding ${DEPS_LDFLAGS} /usr/lib64/libpcscd-glue.so)
+target_link_libraries(dbus-binding ${DEPS_LDFLAGS} libpcscd-glue.so)
 
 set_target_properties(dbus-binding PROPERTIES PREFIX "" LINK_FLAGS "-Wl,--version-script=${VSCRIPT}")
 
