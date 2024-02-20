@@ -28,6 +28,8 @@
 
 #define AFB_BINDING_VERSION 4
 #include <afb/afb-binding.h>
+#include <rp-utils/rp-jsonc.h>
+#include <afb-helpers4/afb-data-utils.h>
 #include <pcsc-glue.h>
 #include "dbus-jsonc.h"
 
@@ -847,7 +849,13 @@ static void v_version(afb_req_t req, unsigned narg, const afb_data_t args[])
 
 static void v_info(afb_req_t req, unsigned narg, const afb_data_t args[])
 {
-	afb_req_reply(req, 0, 0, NULL);
+	json_object *responseJ = json_object_new_object();
+	rp_jsonc_pack(&responseJ, "{verbs related to general tests on this binding}");
+
+	// defining groups of verbs
+
+	afb_data_t repldata = afb_data_json_c_hold(responseJ);
+	afb_req_reply(req, 0, 1, &repldata);
 }
 
 /* array of the verbs exported to afb-daemon */

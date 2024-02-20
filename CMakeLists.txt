@@ -33,7 +33,7 @@ include(FindPkgConfig)
 include(GNUInstallDirs)
 include(CTest)
 
-pkg_check_modules(DEPS REQUIRED afb-binding>=4 libsystemd>=222 json-c)
+pkg_check_modules(DEPS REQUIRED afb-binding>=4 afb-helpers4 libsystemd>=222 json-c)
 
 pkg_get_variable(VSCRIPT afb-binding version_script)
 
