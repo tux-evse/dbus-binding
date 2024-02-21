@@ -901,7 +901,7 @@ static int mainctl(afb_api_t api, afb_ctlid_t ctlid, afb_ctlarg_t ctlarg, void *
 			rc = pthread_create(&thread, NULL, run, NULL);
 		break;
 	case afb_ctlid_Init:
-		rc = afb_api_new_event(api, " NFC event - the device exists", &event_nfc);
+		rc = afb_api_new_event(api, "nfc_device_exists", &event_nfc);
 		break;
 	default:
 		break;
