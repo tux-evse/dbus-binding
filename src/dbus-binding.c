@@ -849,12 +849,172 @@ static void v_version(afb_req_t req, unsigned narg, const afb_data_t args[])
 
 static void v_info(afb_req_t req, unsigned narg, const afb_data_t args[])
 {
-	json_object *responseJ = json_object_new_object();
-	rp_jsonc_pack(&responseJ, "{verbs related to general tests on this binding}");
+	// main parts of the final JSON
+	json_object *responseJ,
+				*metadata, *groups, *generalgroup, *infogroup,
+				*v_version,
+				*v_call, *callsample, *callexample1, *callexample2, *callexample3,
+				*v_signal, *signalsample, *signalexample,
+				*v_subscribe, *subscribesample, *subscribexample1, *subscribexample2,
+				*v_unsubscribe,
+				*v_subscribe_nfc,
+				*v_info;
 
-	// defining groups of verbs
+	// call verb
+	rp_jsonc_pack(&callexample1, "{ss ss ss ss ss ss s[si]}",
+								"bus", "user",
+								"destination", "org.freedesktop.DBus",
+								"path", "/org/freedesktop/DBus",
+								"interface", "org.freedesktop.DBus",
+								"member", "RequestName",
+								"signature", "su",
+								"data", "bzh.iot.dbus.binding", 0
+	);
 
+	rp_jsonc_pack(&callexample2, "{ss ss ss ss ss ss so?}",
+								"bus", "system",
+								"destination", "org.freedesktop.DBus",
+								"path", "/org/freedesktop/DBus",
+								"interface", "org.freedesktop.DBus",
+								"member", "ListNames",
+								"signature", "",
+								"data", NULL
+	);
+
+	rp_jsonc_pack(&callexample3, "{ss ss ss ss ss ss so?}",
+								"bus", "user",
+								"destination", "org.freedesktop.DBus",
+								"path", "/org/freedesktop/DBus",
+								"interface", "org.freedesktop.DBus",
+								"member", "ListNames",
+								"signature", "",
+								"data", NULL
+	);
+
+	callsample = json_object_new_array();
+	json_object_array_add(callsample, callexample1);
+	json_object_array_add(callsample, callexample2);
+	json_object_array_add(callsample, callexample3);
+
+	rp_jsonc_pack(&v_call, "{ss ss ss so}",
+						   "uid", "call",
+						   "info", "Make a call to DBUS method",
+						   "api", "version",
+						   "sample", callsample
+	);
+
+	// signal verb
+	rp_jsonc_pack(&v_signal, "{ss ss ss si}",
+							 "uid", "signal",
+							 "info", "Send a DBUS signal",
+							 "api", "signal",
+							 "usage", NULL	
+	);
+
+	// subscribe verb
+	rp_jsonc_pack(&subscribexample1, "{ss ss ss}",
+								    "bus", "system",
+								    "match", "type=signal,sender=org.freedesktop.NetworkManager",
+								    "event", "nme"
+	);
+
+	rp_jsonc_pack(&subscribexample2, "{ss ss ss}",
+								    "bus", "system",
+								    "match", "type=signal,sender=org.freedesktop.NetworkManager,member=StateChanged",
+								    "event", "nme"
+	);
+
+	subscribesample = json_object_new_array();
+	json_object_array_add(subscribesample, subscribexample1);
+	json_object_array_add(subscribesample, subscribexample2);
+
+	rp_jsonc_pack(&v_subscribe, "{ss ss ss so}",
+								"uid", "subscribe",
+								"info", "Subscribe to a DBUS event",
+								"api", "subscribe",
+								"sample", subscribesample
+	);
+
+	// unsubscribe verb
+	rp_jsonc_pack(&v_unsubscribe, "{ss ss ss so}",
+								  "uid", "unsubscribe",
+								  "info", "Unsuscribe from a previous subscription",
+								  "api", "unsubscribe",
+								  "sample", subscribesample // same like the subscribe verb
+	);
+
+	// check_nfc verb
+	rp_jsonc_pack(&v_subscribe_nfc, "{ss ss ss s{}}",
+									"uid", "subscribe_nfc",
+									"info", "Subscribe to the nfc reader status",
+									"api", "subscribe_nfc",
+									"usage", ""
+	);
+
+	// version verb
+	rp_jsonc_pack(&v_version, "{ss ss ss s{}}",
+						 	  "uid", "version",
+						 	  "info", "Give the binding version",
+							  "api", "version",
+							  "usage", ""	
+	);
+
+	// info verb
+	rp_jsonc_pack(&v_info, "{ss ss ss s{}}",
+						   "uid", "info",
+						   "info", "Give verbs of the binding",
+						   "api", "info",
+						   "usage", ""
+	);
+
+	// stages merging for each stage
+	json_object *infoverbslist = json_object_new_array();
+	json_object_array_add(infoverbslist, v_version);
+	json_object_array_add(infoverbslist, v_info);
+    
+	rp_jsonc_pack(&infogroup, "{ss, ss, so}",
+							  "uid", "info",
+							  "info", "Verbs related to binding infos",
+						      "verbs", infoverbslist
+	);
+
+	json_object *generalverbslist = json_object_new_array();
+	json_object_array_add(generalverbslist, v_call);
+	json_object_array_add(generalverbslist, v_signal);
+	json_object_array_add(generalverbslist, v_subscribe);
+	json_object_array_add(generalverbslist, v_unsubscribe);
+	json_object_array_add(generalverbslist, v_subscribe_nfc);
+
+	rp_jsonc_pack(&generalgroup, "{ss, ss, so}",
+							     "uid", "general",
+							     "info", "Verbs related to general uses of the binding",
+						         "verbs", generalverbslist
+	);
+
+	// groups of verbs
+	groups = json_object_new_array();
+	json_object_array_add(groups, infogroup);
+	json_object_array_add(groups, generalgroup);
+
+
+	// metadata stage
+	rp_jsonc_pack(&metadata, "{ss ss ss}", 
+                             "uid", "dbus-binding",
+                             "info", "Binding for interfacing Dbus",
+                             "version", "1.0"
+    );
+
+	// stages merging
+	int ret = rp_jsonc_pack(&responseJ, "{so, so}",
+							            "metadata", metadata,
+							            "groups", groups
+	);
+
+	// from json_c to afb_data type conversion
 	afb_data_t repldata = afb_data_json_c_hold(responseJ);
+	// AFB_REQ_DEBUG(req, "%s",rp_jsonc_get_error_string(ret));
+
+	// final JSON sending 
 	afb_req_reply(req, 0, 1, &repldata);
 }
 
