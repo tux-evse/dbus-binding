@@ -856,7 +856,7 @@ static void v_info(afb_req_t req, unsigned narg, const afb_data_t args[])
 				*v_call, *callsample, *callexample1, *callexample2, *callexample3,
 				*v_signal, *signalsample, *signalexample,
 				*v_subscribe, *subscribesample, *subscribexample1, *subscribexample2,
-				*v_unsubscribe,
+				*v_unsubscribe, *unsubscribesample, *unsubscribexample1, *unsubscribexample2,
 				*v_subscribe_nfc,
 				*v_info;
 
@@ -936,11 +936,27 @@ static void v_info(afb_req_t req, unsigned narg, const afb_data_t args[])
 	);
 
 	// unsubscribe verb
+	rp_jsonc_pack(&unsubscribexample1, "{ss ss ss}",
+								    "bus", "system",
+								    "match", "type=signal,sender=org.freedesktop.NetworkManager",
+								    "event", "nme"
+	);
+
+	rp_jsonc_pack(&unsubscribexample2, "{ss ss ss}",
+								    "bus", "system",
+								    "match", "type=signal,sender=org.freedesktop.NetworkManager,member=StateChanged",
+								    "event", "nme"
+	);
+
+	unsubscribesample = json_object_new_array();
+	json_object_array_add(unsubscribesample, unsubscribexample1);
+	json_object_array_add(unsubscribesample, unsubscribexample2);
+
 	rp_jsonc_pack(&v_unsubscribe, "{ss ss ss so}",
 								  "uid", "unsubscribe",
 								  "info", "Unsuscribe from a previous subscription",
 								  "api", "unsubscribe",
-								  "sample", subscribesample // same like the subscribe verb
+								  "sample", unsubscribesample
 	);
 
 	// check_nfc verb
