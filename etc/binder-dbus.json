@@ -6,7 +6,8 @@
     ],
     "monitoring": true,
     "ws-server": [
-        "tcp::12311/dbus"
+        "tcp::12311/dbus",
+        "unix:/tmp/api/dbus"
     ],
     "no-httpd":"false"
 }
