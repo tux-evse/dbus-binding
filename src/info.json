@@ -1,0 +1,116 @@
+{
+    "metadata": {
+      "uid": "dbus-binding",
+      "info": "Binding for interfacing Dbus",
+      "version": "1.0"
+    },
+    "groups": [
+      {
+        "uid": "info",
+        "info": "Verbs related to binding infos",
+        "verbs": [
+          {
+            "uid": "version",
+            "info": "Give the binding version",
+            "api": "version",
+            "usage": {}
+          },
+          {
+            "uid": "info",
+            "info": "Give verbs of the binding",
+            "api": "info",
+            "usage": {}
+          }
+        ]
+      },
+      {
+        "uid": "general",
+        "info": "Verbs related to general uses of the binding",
+        "verbs": [
+          {
+            "uid": "call",
+            "info": "Make a call to DBUS method",
+            "api": "version",
+            "sample": [
+              {
+                "bus": "user",
+                "destination": "org.freedesktop.DBus",
+                "path": "/org/freedesktop/DBus",
+                "interface": "org.freedesktop.DBus",
+                "member": "RequestName",
+                "signature": "su",
+                "data": [
+                  "bzh.iot.dbus.binding",
+                  0
+                ]
+              },
+              {
+                "bus": "system",
+                "destination": "org.freedesktop.DBus",
+                "path": "/org/freedesktop/DBus",
+                "interface": "org.freedesktop.DBus",
+                "member": "ListNames",
+                "signature": "",
+                "data": null
+              },
+              {
+                "bus": "user",
+                "destination": "org.freedesktop.DBus",
+                "path": "/org/freedesktop/DBus",
+                "interface": "org.freedesktop.DBus",
+                "member": "ListNames",
+                "signature": "",
+                "data": null
+              }
+            ]
+          },
+          {
+            "uid": "signal",
+            "info": "Send a DBUS signal",
+            "api": "signal",
+            "usage": 0
+          },
+          {
+            "uid": "subscribe",
+            "info": "Subscribe to a DBUS event",
+            "api": "subscribe",
+            "sample": [
+              {
+                "bus": "system",
+                "match": "type=signal,sender=org.freedesktop.NetworkManager",
+                "event": "nme"
+              },
+              {
+                "bus": "system",
+                "match": "type=signal,sender=org.freedesktop.NetworkManager,member=StateChanged",
+                "event": "nme"
+              }
+            ]
+          },
+          {
+            "uid": "unsubscribe",
+            "info": "Unsuscribe from a previous subscription",
+            "api": "unsubscribe",
+            "sample": [
+              {
+                "bus": "system",
+                "match": "type=signal,sender=org.freedesktop.NetworkManager",
+                "event": "nme"
+              },
+              {
+                "bus": "system",
+                "match": "type=signal,sender=org.freedesktop.NetworkManager,member=StateChanged",
+                "event": "nme"
+              }
+            ]
+          },
+          {
+            "uid": "subscribe_nfc",
+            "info": "Subscribe to the nfc reader status",
+            "api": "subscribe_nfc",
+            "usage": {}
+          }
+        ]
+      }
+    ]
+  }

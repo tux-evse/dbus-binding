@@ -33,12 +33,26 @@ include(FindPkgConfig)
 include(GNUInstallDirs)
 include(CTest)
 
+find_program(json2c afb-json2c)
+
+if(NOT json2c)
+    message(FATAL_ERROR "afb-json2c not found, please install afb-idl")
+endif()
+
 pkg_check_modules(DEPS REQUIRED afb-binding>=4 afb-helpers4 libsystemd>=222 json-c)
 
 pkg_get_variable(VSCRIPT afb-binding version_script)
 
 set(DEFBUS SYSTEM CACHE STRING "default bus, either SYSTEM or USER")
 set(AFM_APP_DIR ${CMAKE_INSTALL_PREFIX}/redpesk CACHE PATH "Application directory")
+
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_custom_target(generate_info_src
+    COMMAND afb-json2c ${SOURCE_DIR}/src/info.json > ${SOURCE_DIR}/src/info_generated.c
+    WORKING_DIRECTORY ${SOURCE_DIR}
+    COMMENT "Generating source file from JSON"
+)
 
 add_library(dbus-binding MODULE src/dbus-binding.c src/dbus-jsonc.c)
 target_compile_definitions(dbus-binding PRIVATE DEFAULT_BUSNAME=BUSNAME_${DEFBUS} VERSION="${PROJECT_VERSION}")
@@ -48,8 +62,8 @@ target_link_libraries(dbus-binding ${DEPS_LDFLAGS} libpcscd-glue.so)
 
 set_target_properties(dbus-binding PROPERTIES PREFIX "" LINK_FLAGS "-Wl,--version-script=${VSCRIPT}")
 
-
 set(DEST ${AFM_APP_DIR}/dbus-binding)
 install(TARGETS dbus-binding
         LIBRARY DESTINATION ${DEST}/lib)
 
+add_dependencies(dbus-binding generate_info_src)
